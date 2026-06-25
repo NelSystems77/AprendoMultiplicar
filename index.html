@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#F0F4FF">
+  <title>Súper Tablas by NelSystems 🦉</title>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --bg:#F0F4FF;--surface:#fff;--border:#DDE4F0;--text:#1A2340;--text-soft:#6272A0;
+      --good:#1FAF6E;--good-s:#E4F8EF;--bad:#D94F4F;--bad-s:#FDEAEA;--star:#F0B429;
+      --shadow:0 2px 14px rgba(26,35,64,.09);--radius:20px;--tc:#5B8DEF;--tc-s:#EBF2FF;
+    }
+    html{height:100%}
+    body{
+      height:100%;background:#C8D2E8;overflow:hidden;
+      font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif;
+      color:var(--text);-webkit-font-smoothing:antialiased;
+    }
+    /* ── FRAME ── */
+    #app{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+    #app-frame{position:relative;width:100%;max-width:480px;height:100%;background:var(--bg);overflow:hidden}
+    @media(min-width:540px){
+      #app-frame{max-height:860px;border-radius:34px;box-shadow:0 20px 60px rgba(0,0,0,.22),0 0 0 1px rgba(255,255,255,.2)}
+    }
+    /* ── VIEWS ── */
+    .view{position:absolute;inset:0;display:none;flex-direction:column;background:var(--bg);overflow:hidden}
+    .view.active{display:flex}
+    /* ── HOME ── */
+    .home-header{padding:clamp(18px,5vw,28px) clamp(16px,4vw,24px) 8px;display:flex;align-items:flex-start;gap:12px}
+    .home-owl{font-size:clamp(2.4rem,8vw,3.2rem);line-height:1;animation:owlBob 3s ease-in-out infinite;flex-shrink:0}
+    .home-t{flex:1;min-width:0}
+    .home-title{font-size:clamp(1.5rem,6vw,2rem);font-weight:800;letter-spacing:-.02em;line-height:1.1}
+    .home-sub{font-size:clamp(.82rem,3vw,.95rem);color:var(--text-soft);margin-top:4px}
+    .home-pw{margin:8px clamp(16px,4vw,24px) 0;background:var(--border);border-radius:99px;height:8px;overflow:hidden}
+    .home-pf{height:100%;border-radius:99px;background:linear-gradient(90deg,#5B8DEF,#9B59E8);transition:width .5s ease}
+    .home-label{padding:10px clamp(16px,4vw,24px) 4px;font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft)}
+    .home-grid{flex:1;overflow-y:auto;padding:2px clamp(12px,3vw,18px) 24px;display:grid;grid-template-columns:repeat(3,1fr);gap:10px;align-content:start}
+    @media(max-width:374px){.home-grid{gap:8px;padding-left:10px;padding-right:10px}}
+    .tc-card{
+      background:var(--surface);border-radius:18px;padding:14px 10px;
+      display:flex;flex-direction:column;align-items:center;gap:6px;cursor:pointer;
+      border:2.5px solid transparent;box-shadow:var(--shadow);min-height:108px;
+      transition:transform .14s;-webkit-tap-highlight-color:transparent;user-select:none;
+    }
+    .tc-card:active{transform:scale(.93)}
+    .tc-card.done{border-color:var(--tc);background:var(--tc-s)}
+    .tc-x{font-size:.7rem;font-weight:700;color:var(--text-soft)}
+    .tc-num{font-size:clamp(1.7rem,7vw,2.3rem);font-weight:800;letter-spacing:-.03em;line-height:1;color:var(--tc)}
+    .tc-emoji{font-size:1.35rem;line-height:1}
+    .tc-stars{font-size:.85rem;letter-spacing:2px;min-height:1em}
+    /* ── SHARED HEADER ── */
+    .v-header{
+      flex-shrink:0;padding:max(env(safe-area-inset-top),10px) 14px 10px;
+      display:flex;align-items:center;gap:8px;background:var(--surface);border-bottom:1px solid var(--border);
+    }
+    .btn-ico{
+      width:40px;height:40px;border:none;background:var(--bg);border-radius:12px;
+      font-size:1.1rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+      flex-shrink:0;-webkit-tap-highlight-color:transparent;transition:background .14s;
+    }
+    .btn-ico:active{background:var(--border)}
+    .btn-ico:focus-visible{outline:3px solid var(--tc);outline-offset:2px}
+    .v-hdr-title{flex:1;font-size:.98rem;font-weight:700;text-align:center;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+    .ph{width:40px;flex-shrink:0}
+    /* ── STUDY ── */
+    .study-dots{flex-shrink:0;display:flex;gap:6px;justify-content:center;padding:8px 16px;background:var(--surface);border-bottom:1px solid var(--border)}
+    .dseg{flex:1;max-width:40px;height:5px;border-radius:99px;background:var(--border);transition:background .3s}
+    .dseg.done{background:var(--tc)}
+    .dseg.cur{background:var(--tc);opacity:.5}
+    /* Critical: study-scroller must have height defined by flex:1 for scroll-snap to work */
+    .study-scroller{flex:1;overflow-y:scroll;overflow-x:hidden;scroll-snap-type:y mandatory;scroll-behavior:smooth;-webkit-overflow-scrolling:touch}
+    .s-card{scroll-snap-align:start;min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:clamp(18px,5vw,28px) clamp(14px,4vw,22px) clamp(70px,14vw,90px);gap:14px}
+    .sc-box{background:var(--surface);border-radius:22px;padding:22px;box-shadow:var(--shadow);width:100%;max-width:360px}
+    .sc-lbl{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.09em;color:var(--tc);margin-bottom:10px}
+    .sc-title{font-size:clamp(1.05rem,4vw,1.3rem);font-weight:700;color:var(--text);margin-bottom:10px;line-height:1.3}
+    .sc-body{font-size:.9rem;color:var(--text-soft);line-height:1.65}
+    .sc-formula{background:var(--tc-s);border-left:4px solid var(--tc);border-radius:0 12px 12px 0;padding:10px 14px;margin:10px 0;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:1.1rem;font-weight:700;color:var(--tc)}
+    .sc-hl{background:var(--tc);color:#fff;border-radius:14px;padding:14px;text-align:center;font-size:.96rem;font-weight:700;line-height:1.45;margin:8px 0}
+    .dot-array{display:flex;flex-direction:column;gap:5px;margin:14px auto;align-items:center}
+    .dot-row{display:flex;gap:5px}
+    .dot{width:16px;height:16px;border-radius:50%;background:var(--tc);opacity:0;transition:opacity .2s}
+    .dot.v{opacity:1}
+    .facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
+    .f-row{background:var(--bg);border-radius:10px;padding:7px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86rem;font-weight:600;color:var(--text);display:flex;justify-content:space-between}
+    .f-ans{color:var(--tc);font-weight:800}
+    .sc-cover{background:var(--tc-s);border-radius:22px;padding:26px 22px;text-align:center;width:100%;max-width:360px}
+    .sc-c-emoji{font-size:3.2rem;line-height:1;margin-bottom:10px}
+    .sc-c-title{font-size:clamp(1.4rem,5vw,1.9rem);font-weight:800;letter-spacing:-.02em;color:var(--tc);margin-bottom:6px}
+    .sc-c-tip{font-size:.88rem;color:var(--text-soft);font-weight:600}
+    .sc-c-tip strong{color:var(--tc)}
+    .sc-launch{background:var(--tc-s);border-radius:22px;padding:28px 22px;text-align:center;width:100%;max-width:360px}
+    .sc-l-owl{font-size:2.8rem;line-height:1;margin-bottom:10px;animation:owlBob 2.5s ease-in-out infinite}
+    .sc-l-title{font-size:1.2rem;font-weight:800;color:var(--tc);margin-bottom:6px}
+    .sc-l-sub{font-size:.88rem;color:var(--text-soft);margin-bottom:18px}
+    /* Float nav */
+    .study-float{position:absolute;right:14px;bottom:22px;display:flex;flex-direction:column;gap:8px;z-index:10}
+    .float-btn{width:44px;height:44px;border-radius:14px;border:none;background:var(--surface);box-shadow:0 3px 14px rgba(0,0,0,.14);font-size:1.2rem;cursor:pointer;display:flex;align-items:center;justify-content:center;-webkit-tap-highlight-color:transparent;transition:opacity .2s,transform .14s}
+    .float-btn:active{transform:scale(.88)}
+    .float-btn:disabled{opacity:.25;pointer-events:none}
+    .float-btn:focus-visible{outline:3px solid var(--tc);outline-offset:2px}
+    /* ── QUIZ ── */
+    .quiz-pw{flex-shrink:0;padding:10px 16px 6px;background:var(--surface);border-bottom:1px solid var(--border)}
+    .quiz-pt{background:var(--border);border-radius:99px;height:6px;overflow:hidden}
+    .quiz-pf{height:100%;background:var(--tc);border-radius:99px;transition:width .4s ease}
+    .quiz-pl{text-align:right;font-size:.73rem;color:var(--text-soft);font-weight:600;margin-top:3px}
+    .quiz-body{flex:1;overflow-y:auto;padding:14px 14px 28px;display:flex;flex-direction:column;gap:14px}
+    .quiz-owl-row{display:flex;align-items:center;gap:10px}
+    .quiz-owl{font-size:2rem;line-height:1;animation:owlBob 3s ease-in-out infinite}
+    .quiz-bubble{background:var(--surface);border-radius:0 14px 14px 14px;padding:8px 12px;font-size:.84rem;font-weight:600;color:var(--text-soft);box-shadow:var(--shadow);max-width:200px}
+    .quiz-q-card{background:var(--surface);border-radius:var(--radius);padding:22px;box-shadow:var(--shadow)}
+    .quiz-q{font-size:clamp(1.3rem,5vw,1.75rem);font-weight:800;letter-spacing:-.02em;color:var(--text);line-height:1.2;text-align:center;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace}
+    .quiz-q.wp{font-family:inherit;font-size:clamp(1rem,4vw,1.2rem);font-weight:700;letter-spacing:0}
+    .quiz-att{text-align:center;font-size:.76rem;color:var(--text-soft);font-weight:600;margin-top:6px}
+    .quiz-opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+    .q-opt{
+      min-height:56px;border-radius:16px;border:2.5px solid var(--border);background:var(--surface);
+      font-size:1.3rem;font-weight:800;color:var(--text);cursor:pointer;
+      display:flex;align-items:center;justify-content:center;
+      font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+      transition:border-color .14s,background .14s,transform .14s;
+      -webkit-tap-highlight-color:transparent;padding:8px;
+    }
+    .q-opt:active:not(:disabled){transform:scale(.95)}
+    .q-opt:focus-visible{outline:3px solid var(--tc);outline-offset:2px}
+    .q-opt:disabled{cursor:default}
+    .q-opt.correct{background:var(--good-s);border-color:var(--good);color:var(--good)}
+    .q-opt.wrong{background:var(--bad-s);border-color:var(--bad);color:var(--bad)}
+    .quiz-fb{border-radius:16px;padding:14px;font-size:.88rem;font-weight:600;line-height:1.5;display:none}
+    .quiz-fb.ok{background:var(--good-s);color:var(--good);display:block}
+    .quiz-fb.err{background:var(--bad-s);color:var(--bad);display:block}
+    .quiz-fb.hint{background:#FFF8E6;color:#8A6000;display:block}
+    .quiz-inline{background:var(--tc-s);border-radius:16px;padding:14px;display:none}
+    .quiz-inline.show{display:block}
+    .qi-title{font-weight:700;color:var(--tc);margin-bottom:8px;font-size:.88rem}
+    .qi-body{font-size:.83rem;color:var(--text-soft);line-height:1.55}
+    .qi-hl{background:var(--tc);color:#fff;border-radius:10px;padding:10px;font-size:.85rem;font-weight:700;line-height:1.4;margin:8px 0;text-align:center}
+    .btn-study-lnk{min-height:40px;border-radius:10px;border:2px solid var(--tc);background:transparent;color:var(--tc);font-size:.84rem;font-weight:700;cursor:pointer;padding:6px 14px;margin-top:8px;display:inline-block;-webkit-tap-highlight-color:transparent}
+    .btn-next{min-height:52px;border-radius:16px;border:none;background:var(--tc);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;width:100%;display:none;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:opacity .14s,transform .14s}
+    .btn-next.show{display:flex}
+    .btn-next:active{transform:scale(.97)}
+    .btn-next:focus-visible{outline:3px solid #2a5fcf;outline-offset:2px}
+    /* ── RESULTS ── */
+    .results-scroll{flex:1;overflow-y:auto;padding:20px 16px 40px;display:flex;flex-direction:column;align-items:center;gap:18px}
+    .res-tname{font-size:1rem;font-weight:700;color:var(--text-soft);text-align:center}
+    .gauge-wrap{position:relative;width:155px;height:155px;margin:0 auto}
+    .gauge-svg{width:100%;height:100%;transform:rotate(-90deg)}
+    .g-bg{fill:none;stroke:var(--border);stroke-width:14;stroke-linecap:round}
+    .g-arc{fill:none;stroke:var(--tc);stroke-width:14;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1)}
+    .gauge-text{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .g-num{font-size:clamp(2rem,10vw,2.8rem);font-weight:800;letter-spacing:-.03em;color:var(--tc);font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1}
+    .g-lbl{font-size:.72rem;font-weight:700;color:var(--text-soft);text-transform:uppercase;letter-spacing:.08em}
+    .res-stars{font-size:2rem;letter-spacing:4px;text-align:center}
+    .res-owl-row{background:var(--surface);border-radius:var(--radius);padding:16px;display:flex;align-items:center;gap:12px;box-shadow:var(--shadow);width:100%;max-width:360px}
+    .res-owl{font-size:2.2rem;flex-shrink:0}
+    .res-owl-txt{font-size:.93rem;font-weight:600;color:var(--text);line-height:1.4}
+    .res-box{background:var(--surface);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow);width:100%;max-width:360px}
+    .res-box-title{font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);margin-bottom:10px}
+    .res-stat{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:.9rem}
+    .res-stat:last-child{border-bottom:none}
+    .res-sv{font-weight:800;color:var(--tc)}
+    .wrong-list{width:100%;max-width:360px}
+    .wrong-ttl{font-size:.73rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text-soft);margin-bottom:8px}
+    .wrong-item{background:var(--surface);border-radius:14px;padding:12px;margin-bottom:7px;box-shadow:var(--shadow);border-left:4px solid var(--bad)}
+    .wrong-q{font-weight:700;font-size:.88rem;color:var(--text);margin-bottom:3px}
+    .wrong-a{font-size:.81rem;color:var(--good);font-weight:700}
+    .wrong-e{font-size:.81rem;color:var(--text-soft);margin-top:3px;line-height:1.45}
+    .res-btns{display:flex;flex-direction:column;gap:9px;width:100%;max-width:360px}
+    .btn-pri{min-height:52px;border-radius:16px;border:none;background:var(--tc);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent;transition:opacity .14s}
+    .btn-pri:active{opacity:.82}
+    .btn-pri:focus-visible{outline:3px solid #2a5fcf;outline-offset:2px}
+    .btn-sec{min-height:52px;border-radius:16px;border:2px solid var(--border);background:var(--surface);color:var(--text);font-size:1rem;font-weight:700;cursor:pointer;width:100%;-webkit-tap-highlight-color:transparent;transition:border-color .14s}
+    .btn-sec:active{border-color:var(--tc)}
+    .btn-sec:focus-visible{outline:3px solid var(--tc);outline-offset:2px}
+    /* ── BIG BUTTON ── */
+    .btn-big{min-height:52px;border-radius:16px;border:none;background:var(--tc);color:#fff;font-size:1rem;font-weight:700;cursor:pointer;width:100%;display:flex;align-items:center;justify-content:center;gap:6px;-webkit-tap-highlight-color:transparent;transition:opacity .14s,transform .14s}
+    .btn-big:active{transform:scale(.97)}
+    .btn-big:focus-visible{outline:3px solid #2a5fcf;outline-offset:2px}
+    /* ── ANIMATIONS ── */
+    @keyframes owlBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    @keyframes dotPop{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2)}100%{transform:scale(1);opacity:1}}
+    @keyframes fadeUp{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    /* ── ACCESSIBILITY ── */
+    @media(prefers-reduced-motion:reduce){
+      *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
+    }
+    /* ── RESPONSIVE ── */
+    @media(max-width:374px){.quiz-q{font-size:1.2rem}.q-opt{font-size:1.1rem;min-height:48px}}
+    @media(max-height:560px){
+      .home-owl{font-size:2rem}.sc-c-emoji{font-size:2.4rem}.sc-l-owl{font-size:2rem}
+      .gauge-wrap{width:118px;height:118px}.study-float{bottom:10px}
+    }
+  </style>
+</head>
+<body>
+<div id="app">
+  <div id="app-frame">
+    <!-- HOME -->
+    <section id="view-home" class="view">
+      <div class="home-header">
+        <div class="home-owl" id="home-owl">🦉</div>
+        <div class="home-t">
+          <h1 class="home-title">Súper Tablas</h1>
+          <p class="home-sub" id="home-sub">¡Elegí una tabla para empezar!</p>
+        </div>
+      </div>
+      <div class="home-pw"><div class="home-pf" id="home-pf" style="width:0%"></div></div>
+      <p class="home-label">Orden sugerido para aprender ↓</p>
+      <div class="home-grid" id="home-grid"></div>
+    </section>
+    <!-- STUDY -->
+    <section id="view-study" class="view">
+      <div class="v-header">
+        <button class="btn-ico" id="study-back" aria-label="Volver">←</button>
+        <span class="v-hdr-title" id="study-title">Tabla del 2</span>
+        <button class="btn-ico" id="study-exit" aria-label="Salir al inicio">✕</button>
+      </div>
+      <div class="study-dots" id="study-dots"></div>
+      <div class="study-scroller" id="study-scroller"></div>
+      <div class="study-float">
+        <button class="float-btn" id="sUp" aria-label="Tarjeta anterior">↑</button>
+        <button class="float-btn" id="sDown" aria-label="Siguiente tarjeta">↓</button>
+      </div>
+    </section>
+    <!-- QUIZ -->
+    <section id="view-quiz" class="view">
+      <div class="v-header">
+        <button class="btn-ico" id="quiz-back" aria-label="Volver a estudiar">←</button>
+        <span class="v-hdr-title" id="quiz-title">Quiz</span>
+        <div class="ph"></div>
+      </div>
+      <div class="quiz-pw">
+        <div class="quiz-pt"><div class="quiz-pf" id="quiz-pf" style="width:0%"></div></div>
+        <div class="quiz-pl" id="quiz-pl">0 / 12</div>
+      </div>
+      <div class="quiz-body" id="quiz-body"></div>
+    </section>
+    <!-- RESULTS -->
+    <section id="view-results" class="view">
+      <div class="v-header">
+        <div class="ph"></div>
+        <span class="v-hdr-title" id="res-hdr">¡Terminaste!</span>
+        <div class="ph"></div>
+      </div>
+      <div class="results-scroll" id="res-scroll"></div>
+    </section>
+  </div>
+</div>
+<script>
+'use strict';
+
+/* ══════════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════════ */
+const META = {
+  2: {n:'2',label:'del 2', emoji:'🐧',color:'#4F8EF7',soft:'#EBF2FF',tip:'Duplicá el número',tipD:'El doble de N es N+N. Ej: 2×7=7+7=14'},
+  3: {n:'3',label:'del 3', emoji:'🐸',color:'#2DB87A',soft:'#E4F8EF',tip:'Contá de 3 en 3',tipD:'3→6→9→12→15→18→21→24→27→30'},
+  4: {n:'4',label:'del 4', emoji:'🦋',color:'#E8961E',soft:'#FFF3E0',tip:'Doble del doble',tipD:'4×N = ×2 luego ×2 otra vez. Ej: 4×7=14×2=28'},
+  5: {n:'5',label:'del 5', emoji:'⭐',color:'#D060A0',soft:'#FCE8F4',tip:'Termina en 0 ó 5',tipD:'5·10·15·20·25·30·35·40·45·50 — siempre 0 ó 5'},
+  6: {n:'6',label:'del 6', emoji:'🐠',color:'#7050E0',soft:'#EDE8FC',tip:'6×7=42, 6×8=48',tipD:'Los más difíciles: 6×7=42 y 6×8=48. ¡Aprendelos de memoria!'},
+  7: {n:'7',label:'del 7', emoji:'🦊',color:'#E06030',soft:'#FDEEE8',tip:'5,6,7,8 → 56=7×8',tipD:'Cuatro números seguidos: 5,6,7,8 → 56=7×8. ¡El truco más famoso!'},
+  8: {n:'8',label:'del 8', emoji:'🐙',color:'#1A9A90',soft:'#E0F6F4',tip:'Duplicá 3 veces',tipD:'8×N = ×2 ×2 ×2. Ej: 8×3=6=12=24'},
+  9: {n:'9',label:'del 9', emoji:'🌙',color:'#B03070',soft:'#FCE4EE',tip:'Los dígitos suman 9',tipD:'9×2=18(1+8=9), 9×3=27(2+7=9)... ¡siempre!'},
+ 10: {n:'10',label:'del 10',emoji:'🚀',color:'#2F9E55',soft:'#E4F5EB',tip:'Agregá un cero',tipD:'10×7=70, 10×9=90. Solo agrega un 0 al final.'},
+};
+
+const ORDER = [2,5,10,3,4,9,6,7,8];
+const DOT_EX = {2:[2,5],3:[3,4],4:[4,4],5:[5,4],6:[6,3],7:[7,3],8:[8,3],9:[9,2],10:[10,2]};
+const STUDY_CARDS = 5;
+
+const QD = {
+2:[
+  {q:'2 × 1', ans:2,  opts:[2,3,4,5],    exp:'¡Cualquier número × 1 es él mismo! 2×1 = 2 ✓'},
+  {q:'2 × 2', ans:4,  opts:[2,4,6,8],    exp:'El doble de 2 = 4. Comprobá: 2+2 = 4 ✓'},
+  {q:'2 × 3', ans:6,  opts:[4,6,8,10],   exp:'El doble de 3 = 6. Comprobá: 3+3 = 6 ✓'},
+  {q:'2 × 4', ans:8,  opts:[6,8,10,12],  exp:'El doble de 4 = 8. Comprobá: 4+4 = 8 ✓'},
+  {q:'2 × 5', ans:10, opts:[8,10,12,14], exp:'El doble de 5 = 10. Comprobá: 5+5 = 10 ✓'},
+  {q:'2 × 6', ans:12, opts:[10,12,14,16],exp:'El doble de 6 = 12. Comprobá: 6+6 = 12 ✓'},
+  {q:'2 × 7', ans:14, opts:[12,14,16,18],exp:'El doble de 7 = 14. Comprobá: 7+7 = 14 ✓'},
+  {q:'2 × 8', ans:16, opts:[14,16,18,20],exp:'El doble de 8 = 16. Comprobá: 8+8 = 16 ✓'},
+  {q:'2 × 9', ans:18, opts:[14,16,18,20],exp:'El doble de 9 = 18. Comprobá: 9+9 = 18 ✓'},
+  {q:'2 × 10',ans:20, opts:[16,18,20,22],exp:'El doble de 10 = 20. Comprobá: 10+10 = 20 ✓'},
+  {q:'2 × ? = 18',ans:9,opts:[7,8,9,10],exp:'2×9 = 18. El número que falta es 9 ✓'},
+  {q:'Tenés 2 bolsas con 7 manzanas cada una. ¿Cuántas manzanas hay?',ans:14,opts:[10,12,14,16],exp:'2 bolsas × 7 manzanas = 14 manzanas. El doble de 7 = 14 ✓'},
+],
+5:[
+  {q:'5 × 1', ans:5,  opts:[1,5,10,15],  exp:'5×1 = 5. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'5 × 2', ans:10, opts:[5,10,15,20], exp:'5×2 = 10. Contás: 5, 10 ✓'},
+  {q:'5 × 3', ans:15, opts:[10,15,20,25],exp:'5×3 = 15. Contás: 5, 10, 15 ✓'},
+  {q:'5 × 4', ans:20, opts:[15,20,25,30],exp:'5×4 = 20. Contás: 5, 10, 15, 20 ✓'},
+  {q:'5 × 5', ans:25, opts:[20,25,30,35],exp:'5×5 = 25. El cuadrado del 5 es 25 ✓'},
+  {q:'5 × 6', ans:30, opts:[25,30,35,40],exp:'5×6 = 30. Mitad de 6 (=3) + un cero → 30 ✓'},
+  {q:'5 × 7', ans:35, opts:[30,35,40,45],exp:'5×7 = 35. ¡Siempre termina en 0 ó 5! ✓'},
+  {q:'5 × 8', ans:40, opts:[35,40,45,50],exp:'5×8 = 40. Mitad de 8 (=4) + un cero → 40 ✓'},
+  {q:'5 × 9', ans:45, opts:[40,45,50,55],exp:'5×9 = 45. ¡Termina en 5 siempre! ✓'},
+  {q:'5 × 10',ans:50, opts:[40,45,50,55],exp:'5×10 = 50. Mitad de 10 (=5) + un cero → 50 ✓'},
+  {q:'5 × ? = 35',ans:7,opts:[5,6,7,8],  exp:'5×7 = 35. Contando: 5,10,15,20,25,30,35 → 7 saltos ✓'},
+  {q:'Una mano tiene 5 dedos. ¿Cuántos dedos tienen 6 manos?',ans:30,opts:[25,30,35,40],exp:'6 manos × 5 dedos = 30 dedos. 5×6 = 30 ✓'},
+],
+10:[
+  {q:'10 × 1', ans:10, opts:[1,10,20,100], exp:'10×1 = 10. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'10 × 2', ans:20, opts:[10,20,30,40], exp:'10×2 = 20. Agrega un cero al 2 → 20 ✓'},
+  {q:'10 × 3', ans:30, opts:[20,30,40,50], exp:'10×3 = 30. Agrega un cero al 3 → 30 ✓'},
+  {q:'10 × 4', ans:40, opts:[30,40,50,60], exp:'10×4 = 40. Agrega un cero al 4 → 40 ✓'},
+  {q:'10 × 5', ans:50, opts:[40,50,60,70], exp:'10×5 = 50. Agrega un cero al 5 → 50 ✓'},
+  {q:'10 × 6', ans:60, opts:[50,60,70,80], exp:'10×6 = 60. Agrega un cero al 6 → 60 ✓'},
+  {q:'10 × 7', ans:70, opts:[60,70,80,90], exp:'10×7 = 70. Agrega un cero al 7 → 70 ✓'},
+  {q:'10 × 8', ans:80, opts:[70,80,90,100],exp:'10×8 = 80. Agrega un cero al 8 → 80 ✓'},
+  {q:'10 × 9', ans:90, opts:[80,90,95,100],exp:'10×9 = 90. Agrega un cero al 9 → 90 ✓'},
+  {q:'10 × 10',ans:100,opts:[90,95,100,110],exp:'10×10 = 100. El cuadrado del 10 es 100 ✓'},
+  {q:'10 × ? = 70',ans:7,opts:[5,6,7,8],   exp:'10×7 = 70. Al agegar un cero al 7 obtenés 70 ✓'},
+  {q:'Comprás 10 paquetes con 4 galletas cada uno. ¿Cuántas galletas hay?',ans:40,opts:[30,35,40,45],exp:'10 paquetes × 4 galletas = 40 galletas. 10×4 = 40 ✓'},
+],
+3:[
+  {q:'3 × 1', ans:3,  opts:[1,2,3,4],    exp:'3×1 = 3. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'3 × 2', ans:6,  opts:[3,6,9,12],   exp:'3×2 = 6. Contás: 3, 6 ✓'},
+  {q:'3 × 3', ans:9,  opts:[6,9,12,15],  exp:'3×3 = 9. Contás: 3, 6, 9 ✓'},
+  {q:'3 × 4', ans:12, opts:[9,12,15,18], exp:'3×4 = 12. Contás: 3, 6, 9, 12 ✓'},
+  {q:'3 × 5', ans:15, opts:[12,15,18,21],exp:'3×5 = 15. Contás: 3, 6, 9, 12, 15 ✓'},
+  {q:'3 × 6', ans:18, opts:[15,18,21,24],exp:'3×6 = 18. Contás: 3, 6, 9, 12, 15, 18 ✓'},
+  {q:'3 × 7', ans:21, opts:[18,21,24,27],exp:'3×7 = 21. Contás: 3, 6, 9, 12, 15, 18, 21 ✓'},
+  {q:'3 × 8', ans:24, opts:[21,24,27,30],exp:'3×8 = 24. Contás: 3, 6, 9, 12, 15, 18, 21, 24 ✓'},
+  {q:'3 × 9', ans:27, opts:[24,27,30,33],exp:'3×9 = 27. Truco: los dígitos suman 9: 2+7=9 ✓'},
+  {q:'3 × 10',ans:30, opts:[27,30,33,36],exp:'3×10 = 30. Agrega un cero al 3 → 30 ✓'},
+  {q:'3 × ? = 24',ans:8,opts:[6,7,8,9],  exp:'3×8 = 24. Contando: 3,6,9,12,15,18,21,24 → 8 saltos ✓'},
+  {q:'Un triángulo tiene 3 lados. ¿Cuántos lados tienen 7 triángulos?',ans:21,opts:[18,21,24,27],exp:'7 triángulos × 3 lados = 21 lados. 3×7 = 21 ✓'},
+],
+4:[
+  {q:'4 × 1', ans:4,  opts:[2,3,4,5],    exp:'4×1 = 4. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'4 × 2', ans:8,  opts:[4,8,12,16],  exp:'4×2 = 8. Doble del doble: 2×2=4, 4×2=8 ✓'},
+  {q:'4 × 3', ans:12, opts:[8,12,16,20], exp:'4×3 = 12. Doble del doble: 3×2=6, 6×2=12 ✓'},
+  {q:'4 × 4', ans:16, opts:[12,16,20,24],exp:'4×4 = 16. Doble del doble: 4×2=8, 8×2=16 ✓'},
+  {q:'4 × 5', ans:20, opts:[16,20,24,28],exp:'4×5 = 20. Doble del doble: 5×2=10, 10×2=20 ✓'},
+  {q:'4 × 6', ans:24, opts:[20,24,28,32],exp:'4×6 = 24. Doble del doble: 6×2=12, 12×2=24 ✓'},
+  {q:'4 × 7', ans:28, opts:[24,28,32,36],exp:'4×7 = 28. Doble del doble: 7×2=14, 14×2=28 ✓'},
+  {q:'4 × 8', ans:32, opts:[28,32,36,40],exp:'4×8 = 32. Doble del doble: 8×2=16, 16×2=32 ✓'},
+  {q:'4 × 9', ans:36, opts:[32,36,40,44],exp:'4×9 = 36. Doble del doble: 9×2=18, 18×2=36 ✓'},
+  {q:'4 × 10',ans:40, opts:[36,40,44,48],exp:'4×10 = 40. Agrega un cero al 4 → 40 ✓'},
+  {q:'4 × ? = 32',ans:8,opts:[6,7,8,9],  exp:'4×8 = 32. Doble del doble: 8×2=16, 16×2=32 ✓'},
+  {q:'Una silla tiene 4 patas. ¿Cuántas patas tienen 9 sillas?',ans:36,opts:[32,36,40,44],exp:'9 sillas × 4 patas = 36 patas. 4×9 = 36 ✓'},
+],
+9:[
+  {q:'9 × 1', ans:9,  opts:[7,8,9,10],   exp:'9×1 = 9. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'9 × 2', ans:18, opts:[9,18,27,36],  exp:'9×2 = 18. ¡Los dígitos suman 9! 1+8=9 ✓'},
+  {q:'9 × 3', ans:27, opts:[18,27,36,45], exp:'9×3 = 27. ¡Los dígitos suman 9! 2+7=9 ✓'},
+  {q:'9 × 4', ans:36, opts:[27,36,45,54], exp:'9×4 = 36. ¡Los dígitos suman 9! 3+6=9 ✓'},
+  {q:'9 × 5', ans:45, opts:[36,45,54,63], exp:'9×5 = 45. ¡Los dígitos suman 9! 4+5=9 ✓'},
+  {q:'9 × 6', ans:54, opts:[45,54,63,72], exp:'9×6 = 54. ¡Los dígitos suman 9! 5+4=9 ✓'},
+  {q:'9 × 7', ans:63, opts:[54,63,72,81], exp:'9×7 = 63. ¡Los dígitos suman 9! 6+3=9 ✓'},
+  {q:'9 × 8', ans:72, opts:[63,72,81,90], exp:'9×8 = 72. ¡Los dígitos suman 9! 7+2=9 ✓'},
+  {q:'9 × 9', ans:81, opts:[72,81,90,99], exp:'9×9 = 81. ¡Los dígitos suman 9! 8+1=9 ✓'},
+  {q:'9 × 10',ans:90, opts:[81,90,99,100],exp:'9×10 = 90. Agrega un cero → 90. 9+0=9 ✓'},
+  {q:'9 × ? = 63',ans:7,opts:[6,7,8,9],   exp:'9×7 = 63. Los dígitos 6+3=9, el número es 7 ✓'},
+  {q:'Hay 9 mesas con 8 sillas cada una. ¿Cuántas sillas hay?',ans:72,opts:[63,72,81,90],exp:'9 mesas × 8 sillas = 72 sillas. 9×8 = 72. Los dígitos 7+2=9 ✓'},
+],
+6:[
+  {q:'6 × 1', ans:6,  opts:[4,5,6,7],    exp:'6×1 = 6. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'6 × 2', ans:12, opts:[6,12,18,24],  exp:'6×2 = 12. El doble de 6 = 12 ✓'},
+  {q:'6 × 3', ans:18, opts:[12,18,24,30], exp:'6×3 = 18. Contás: 6, 12, 18 ✓'},
+  {q:'6 × 4', ans:24, opts:[18,24,30,36], exp:'6×4 = 24. Doble del doble: 6×2=12, 12×2=24 ✓'},
+  {q:'6 × 5', ans:30, opts:[24,30,36,42], exp:'6×5 = 30. Mitad de 6 (=3) + cero → 30 ✓'},
+  {q:'6 × 6', ans:36, opts:[30,36,42,48], exp:'6×6 = 36. El cuadrado del 6 es 36 ✓'},
+  {q:'6 × 7', ans:42, opts:[36,42,48,54], exp:'6×7 = 42. ¡Aprendelo de memoria! 6×7 = 42 ✓'},
+  {q:'6 × 8', ans:48, opts:[42,48,54,60], exp:'6×8 = 48. ¡El otro importante! 6×8 = 48 ✓'},
+  {q:'6 × 9', ans:54, opts:[48,54,60,66], exp:'6×9 = 54. Dígitos del 9: 5+4=9 ✓'},
+  {q:'6 × 10',ans:60, opts:[54,60,66,72], exp:'6×10 = 60. Agrega un cero → 60 ✓'},
+  {q:'6 × ? = 42',ans:7,opts:[6,7,8,9],   exp:'6×7 = 42. Contando: 6,12,18,24,30,36,42 → 7 saltos ✓'},
+  {q:'Hay 6 filas de bancas con 7 bancas cada fila. ¿Cuántas bancas hay?',ans:42,opts:[36,42,48,54],exp:'6 filas × 7 bancas = 42 bancas. 6×7 = 42 ✓'},
+],
+7:[
+  {q:'7 × 1', ans:7,  opts:[5,6,7,8],    exp:'7×1 = 7. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'7 × 2', ans:14, opts:[7,14,21,28],  exp:'7×2 = 14. El doble de 7 = 14 ✓'},
+  {q:'7 × 3', ans:21, opts:[14,21,28,35], exp:'7×3 = 21. Contás: 7, 14, 21 ✓'},
+  {q:'7 × 4', ans:28, opts:[21,28,35,42], exp:'7×4 = 28. Contás: 7, 14, 21, 28 ✓'},
+  {q:'7 × 5', ans:35, opts:[28,35,42,49], exp:'7×5 = 35. Contás: 7, 14, 21, 28, 35 ✓'},
+  {q:'7 × 6', ans:42, opts:[35,42,49,56], exp:'7×6 = 42. ¡Igual que 6×7=42! La multiplicación es conmutativa ✓'},
+  {q:'7 × 7', ans:49, opts:[42,49,56,63], exp:'7×7 = 49. El cuadrado del 7 es 49 ✓'},
+  {q:'7 × 8', ans:56, opts:[49,56,63,70], exp:'7×8 = 56. ¡Truco famoso! 5,6,7,8 → 56=7×8 ✓'},
+  {q:'7 × 9', ans:63, opts:[56,63,70,77], exp:'7×9 = 63. Dígitos del 9: 6+3=9 ✓'},
+  {q:'7 × 10',ans:70, opts:[63,70,77,84], exp:'7×10 = 70. Agrega un cero al 7 → 70 ✓'},
+  {q:'7 × ? = 56',ans:8,opts:[6,7,8,9],   exp:'7×8 = 56. ¡Recordá: 5,6,7,8 → 56! El número es 8 ✓'},
+  {q:'La semana tiene 7 días. ¿Cuántos días tienen 5 semanas?',ans:35,opts:[28,35,42,49],exp:'5 semanas × 7 días = 35 días. 7×5 = 35 ✓'},
+],
+8:[
+  {q:'8 × 1', ans:8,  opts:[6,7,8,9],    exp:'8×1 = 8. ¡Cualquier número × 1 es él mismo! ✓'},
+  {q:'8 × 2', ans:16, opts:[8,16,24,32],  exp:'8×2 = 16. El doble de 8 = 16 ✓'},
+  {q:'8 × 3', ans:24, opts:[16,24,32,40], exp:'8×3 = 24. Duplicá 3 veces: 3→6→12→24 ✓'},
+  {q:'8 × 4', ans:32, opts:[24,32,40,48], exp:'8×4 = 32. Duplicá 3 veces: 4→8→16→32 ✓'},
+  {q:'8 × 5', ans:40, opts:[32,40,48,56], exp:'8×5 = 40. Mitad de 8 (=4) + cero → 40 ✓'},
+  {q:'8 × 6', ans:48, opts:[40,48,56,64], exp:'8×6 = 48. ¡Igual que 6×8=48! (conmutativa) ✓'},
+  {q:'8 × 7', ans:56, opts:[48,56,64,72], exp:'8×7 = 56. ¡Truco: 5,6,7,8 → 56=7×8=8×7! ✓'},
+  {q:'8 × 8', ans:64, opts:[56,64,72,80], exp:'8×8 = 64. El cuadrado del 8 es 64 ✓'},
+  {q:'8 × 9', ans:72, opts:[64,72,80,88], exp:'8×9 = 72. Dígitos del 9: 7+2=9 ✓'},
+  {q:'8 × 10',ans:80, opts:[72,80,88,96], exp:'8×10 = 80. Agrega un cero al 8 → 80 ✓'},
+  {q:'8 × ? = 72',ans:9,opts:[7,8,9,10],  exp:'8×9 = 72. Dígitos 7+2=9, el número es 9 ✓'},
+  {q:'Un pulpo tiene 8 brazos. ¿Cuántos brazos tienen 7 pulpos?',ans:56,opts:[48,56,64,72],exp:'7 pulpos × 8 brazos = 56 brazos. 8×7=56. ¡Recordá: 5,6,7,8! ✓'},
+],
+};
+
+/* ══════════════════════════════════════════════════
+   STATE
+══════════════════════════════════════════════════ */
+const S = {
+  view:'home', table:0, studyIdx:0,
+  fromQuiz:false,
+  quizQs:[], quizIdx:0,
+  firstAns:{}, attempts:0, answered:false,
+  stars:{},
+};
+
+function loadStars(){try{const d=localStorage.getItem('st-stars-v3');return d?JSON.parse(d):{}}catch{return {}}}
+function saveStars(){try{localStorage.setItem('st-stars-v3',JSON.stringify(S.stars))}catch{}}
+
+/* ══════════════════════════════════════════════════
+   HELPERS
+══════════════════════════════════════════════════ */
+const $ = id => document.getElementById(id);
+const qs = sel => document.querySelector(sel);
+
+function setTC(n){
+  const m=META[n];
+  document.documentElement.style.setProperty('--tc',m.color);
+  document.documentElement.style.setProperty('--tc-s',m.soft);
+}
+function resetTC(){
+  document.documentElement.style.setProperty('--tc','#5B8DEF');
+  document.documentElement.style.setProperty('--tc-s','#EBF2FF');
+}
+function showView(id){
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  const v=document.getElementById('view-'+id);
+  if(v)v.classList.add('active');
+  S.view=id;
+}
+function stars(n){
+  if(!n)return '<span style="color:var(--border)">☆☆☆</span>';
+  return '⭐'.repeat(n)+'<span style="color:var(--border)">☆</span>'.repeat(3-n);
+}
+function isSimpleMath(q){return /^\d+ × \d+$/.test(q.trim())}
+
+/* ══════════════════════════════════════════════════
+   HOME
+══════════════════════════════════════════════════ */
+function renderHome(){
+  resetTC();
+  const done=ORDER.filter(n=>(S.stars[n]||0)>0).length;
+  $('home-pf').style.width=Math.round(done/9*100)+'%';
+  const owl=$('home-owl'),sub=$('home-sub');
+  if(done===9){owl.textContent='🦉🎉';sub.textContent='¡Completaste todas las tablas! ¡Eres increíble! 🎉'}
+  else if(done===0){owl.textContent='🦉';sub.textContent='¡Elegí una tabla para empezar!'}
+  else{owl.textContent='🦉💪';sub.textContent=`¡Vas ${done} de 9 tablas! ¡Seguí así!`}
+
+  const grid=$('home-grid');
+  grid.innerHTML='';
+  ORDER.forEach(n=>{
+    const m=META[n],st=S.stars[n]||0;
+    const d=document.createElement('div');
+    d.className='tc-card'+(st>0?' done':'');
+    d.style.cssText=`--tc:${m.color};--tc-s:${m.soft}`;
+    d.innerHTML=`<span class="tc-x">×</span><span class="tc-num">${n}</span><span class="tc-emoji">${m.emoji}</span><span class="tc-stars">${stars(st)}</span>`;
+    d.addEventListener('click',()=>openStudy(n,false));
+    grid.appendChild(d);
+  });
+  showView('home');
+}
+
+/* ══════════════════════════════════════════════════
+   STUDY
+══════════════════════════════════════════════════ */
+const TRICKS = {
+  2:`<div class="sc-title">¡Solo duplicá el número!</div><div class="sc-hl">2 × N = N + N</div><div class="sc-body">2×6 = 6+6 = <strong>12</strong><br>2×9 = 9+9 = <strong>18</strong><br>2×7 = 7+7 = <strong>14</strong></div>`,
+  3:`<div class="sc-title">¡Contá de 3 en 3!</div><div class="sc-hl">3→6→9→12→15→18→21→24→27→30</div><div class="sc-body">3×4 = el 4to número = <strong>12</strong><br>3×7 = el 7mo número = <strong>21</strong><br>¡Practicá en voz alta!</div>`,
+  4:`<div class="sc-title">¡El doble del doble!</div><div class="sc-hl">4 × N = (N×2) × 2</div><div class="sc-body">4×7 → 7×2=14 → 14×2=<strong>28</strong><br>4×8 → 8×2=16 → 16×2=<strong>32</strong><br>4×9 → 9×2=18 → 18×2=<strong>36</strong></div>`,
+  5:`<div class="sc-title">¡Siempre termina en 0 ó 5!</div><div class="sc-hl">5·10·15·20·25·30·35·40·45·50</div><div class="sc-body">Factor par: mitad + cero. 5×8 → 8÷2=4 → <strong>40</strong><br>Factor impar: termina en 5. 5×7 = <strong>35</strong></div>`,
+  6:`<div class="sc-title">Los dos más importantes del 6:</div><div class="sc-hl">6 × 7 = 42 &nbsp;·&nbsp; 6 × 8 = 48</div><div class="sc-body">¡Aprendelos de memoria!<br>El resto: 6×2=12, 6×3=18, 6×4=24, 6×5=30, 6×6=36, 6×9=54, 6×10=60</div>`,
+  7:`<div class="sc-title">¡El truco de los 4 números seguidos!</div><div class="sc-hl">5 · 6 · 7 · 8 → 56 = 7 × 8</div><div class="sc-body">El hecho más difícil tiene su propio truco:<br>cuatro números seguidos te dicen que <strong>7×8=56</strong>.<br>El resto del 7: 7→14→21→28→35→42→49→56→63→70</div>`,
+  8:`<div class="sc-title">¡Duplicá 3 veces!</div><div class="sc-hl">8 × N = N×2 → ×2 → ×2</div><div class="sc-body">8×3 → 3×2=6 → 6×2=12 → 12×2=<strong>24</strong><br>8×7 → 7×2=14 → 14×2=28 → 28×2=<strong>56</strong><br>¡Recordá también: 5,6,7,8 → 56=8×7!</div>`,
+  9:`<div class="sc-title">¡Los dígitos siempre suman 9!</div><div class="sc-hl">9×2=18(1+8=9)&nbsp;·&nbsp;9×5=45(4+5=9)</div><div class="sc-body">Truco extra: el primer dígito = factor − 1<br>9×3 → 3−1=<strong>2</strong> → segundo dígito = 9−2=<strong>7</strong> → <strong>27</strong><br>9×7 → 7−1=<strong>6</strong> → 9−6=<strong>3</strong> → <strong>63</strong></div>`,
+  10:`<div class="sc-title">¡La más fácil! Solo agregá un 0.</div><div class="sc-hl">10 × N = N seguido de un cero</div><div class="sc-body">10×3 = <strong>30</strong> &nbsp; 10×7 = <strong>70</strong><br>10×9 = <strong>90</strong> &nbsp; 10×10 = <strong>100</strong></div>`,
+};
+
+function buildDotArray(n){
+  const [r,c]=DOT_EX[n];
+  let h=`<div class="dot-array" id="da-${n}">`;
+  for(let i=0;i<r;i++){h+=`<div class="dot-row">`;for(let j=0;j<c;j++)h+=`<div class="dot" data-i="${i*c+j}"></div>`;h+=`</div>`;}
+  return h+'</div>';
+}
+
+function animateDots(n){
+  const el=document.getElementById('da-'+n);
+  if(!el)return;
+  const dots=el.querySelectorAll('.dot');
+  dots.forEach((d,i)=>setTimeout(()=>{
+    d.style.animation='dotPop .3s ease forwards';
+    d.classList.add('v');
+  },i*45));
+}
+
+function buildStudyCards(n){
+  const m=META[n];
+  const [r,c]=DOT_EX[n];
+  const product=r*c;
+  const cards=[];
+
+  // Card 0: Cover
+  const c0=document.createElement('div');c0.className='s-card';
+  c0.innerHTML=`<div class="sc-cover"><div class="sc-c-emoji">${m.emoji}</div><div class="sc-c-title">¡Tabla del ${m.n}!</div><div class="sc-c-tip">Truco clave: <strong>${m.tip}</strong></div></div><div class="sc-box" style="max-width:360px;width:100%"><div class="sc-lbl">¿Qué aprenderás?</div><div class="sc-body">Los 10 hechos de la tabla del ${m.n}, de ${m.n}×1 hasta ${m.n}×10, con trucos para recordarlos fácilmente. 🧠</div></div>`;
+  cards.push(c0);
+
+  // Card 1: Concepto (dot array)
+  const c1=document.createElement('div');c1.className='s-card';
+  c1.innerHTML=`<div class="sc-box" style="max-width:360px;width:100%"><div class="sc-lbl">📐 ¿Qué significa multiplicar?</div><div class="sc-title">Multiplicar = grupos iguales sumados</div><div class="sc-body">${m.n} × ${c} significa <strong>${m.n} grupos de ${c}</strong>:</div>${buildDotArray(n)}<div class="sc-formula">${m.n} × ${c} = ${product}</div><div class="sc-body">${r} filas × ${c} puntos = <strong>${product} puntos en total</strong></div></div>`;
+  cards.push(c1);
+
+  // Card 2: Trick
+  const c2=document.createElement('div');c2.className='s-card';
+  c2.innerHTML=`<div class="sc-box" style="max-width:360px;width:100%"><div class="sc-lbl">✨ El truco del ${m.n}</div>${TRICKS[n]||'<div class="sc-body">'+m.tipD+'</div>'}</div>`;
+  cards.push(c2);
+
+  // Card 3: Full table
+  const c3=document.createElement('div');c3.className='s-card';
+  let facts='<div class="facts-grid">';
+  for(let i=1;i<=10;i++)facts+=`<div class="f-row"><span>${n}×${i} =</span><span class="f-ans">${n*i}</span></div>`;
+  facts+='</div>';
+  c3.innerHTML=`<div class="sc-box" style="max-width:360px;width:100%"><div class="sc-lbl">📋 Tabla completa del ${m.n}</div>${facts}</div>`;
+  cards.push(c3);
+
+  // Card 4: Launch
+  const c4=document.createElement('div');c4.className='s-card';
+  c4.innerHTML=`<div class="sc-launch"><div class="sc-l-owl">🦉</div><div class="sc-l-title">¡Ya conocés la tabla del ${m.n}!</div><div class="sc-l-sub">¿Listo para el quiz de 12 preguntas?</div><button class="btn-big" id="btn-start-quiz">Empezar quiz →</button></div>`;
+  cards.push(c4);
+
+  return cards;
+}
+
+function openStudy(n, fromQuiz){
+  S.table=n; S.studyIdx=0; S.fromQuiz=!!fromQuiz;
+  setTC(n);
+  const m=META[n];
+
+  $('study-title').textContent='Tabla del '+m.n;
+
+  // Dots
+  const dotsEl=$('study-dots');
+  dotsEl.innerHTML='';
+  for(let i=0;i<STUDY_CARDS;i++){
+    const d=document.createElement('div');
+    d.className='dseg'+(i===0?' cur':'');
+    dotsEl.appendChild(d);
+  }
+
+  // Cards
+  const scr=$('study-scroller');
+  scr.innerHTML='';
+  buildStudyCards(n).forEach(card=>scr.appendChild(card));
+  scr.scrollTo({top:0,behavior:'instant'});
+
+  updateStudyArrows();
+  showView('study');
+}
+
+function updateStudyDots(idx){
+  $('study-dots').querySelectorAll('.dseg').forEach((d,i)=>{
+    d.className='dseg'+(i<idx?' done':i===idx?' cur':'');
+  });
+}
+function updateStudyArrows(){
+  $('sUp').disabled=S.studyIdx<=0;
+  $('sDown').disabled=S.studyIdx>=STUDY_CARDS-1;
+}
+function scrollStudyTo(idx){
+  const scr=$('study-scroller');
+  const h=scr.clientHeight;
+  scr.scrollTo({top:idx*h,behavior:'smooth'});
+  S.studyIdx=idx;
+  updateStudyDots(idx);
+  updateStudyArrows();
+  if(idx===1)setTimeout(()=>animateDots(S.table),300);
+}
+function getStudyIdx(){
+  const scr=$('study-scroller');
+  const h=scr.clientHeight;
+  return h?Math.round(scr.scrollTop/h):0;
+}
+
+/* ══════════════════════════════════════════════════
+   QUIZ
+══════════════════════════════════════════════════ */
+function startQuiz(n){
+  S.table=n; setTC(n);
+  S.quizQs=[...(QD[n]||[])];
+  S.quizIdx=0; S.firstAns={}; S.attempts=0; S.answered=false;
+  $('quiz-title').textContent='Quiz · Tabla del '+META[n].n;
+  renderQ();
+  showView('quiz');
+}
+
+function renderQ(){
+  const q=S.quizQs[S.quizIdx];
+  const total=S.quizQs.length;
+  const pct=Math.round(S.quizIdx/total*100);
+  $('quiz-pf').style.width=pct+'%';
+  $('quiz-pl').textContent=S.quizIdx+' / '+total;
+
+  const isSimple=isSimpleMath(q.q);
+  const dQ=isSimple?q.q+' = ?':q.q;
+  const wpCls=!isSimple?'wp':'';
+
+  $('quiz-body').innerHTML=`
+    <div class="quiz-owl-row">
+      <span class="quiz-owl" id="qOwl">🦉</span>
+      <div class="quiz-bubble" id="qBub">¡Vos podés hacerlo!</div>
+    </div>
+    <div class="quiz-q-card">
+      <div class="quiz-q ${wpCls}" id="qQ">${dQ}</div>
+      <div class="quiz-att" id="qAtt"></div>
+    </div>
+    <div class="quiz-opts" id="qOpts">
+      ${q.opts.map(o=>`<button class="q-opt" data-v="${o}">${o}</button>`).join('')}
+    </div>
+    <div class="quiz-fb" id="qFb"></div>
+    <div class="quiz-inline" id="qInline"></div>
+    <button class="btn-next" id="btnNext">Siguiente →</button>
+  `;
+
+  $('quiz-body').querySelectorAll('.q-opt').forEach(b=>{
+    b.addEventListener('click',()=>handleAns(Number(b.dataset.v)));
+  });
+  $('btnNext').addEventListener('click',nextQ);
+  S.attempts=0; S.answered=false;
+}
+
+function handleAns(val){
+  if(S.answered)return;
+  const q=S.quizQs[S.quizIdx];
+  const ok=val===q.ans;
+
+  // Record first attempt only
+  if(!(S.quizIdx in S.firstAns))S.firstAns[S.quizIdx]=ok;
+
+  if(ok){
+    S.answered=true;
+    document.querySelectorAll('.q-opt').forEach(b=>{
+      if(Number(b.dataset.v)===q.ans)b.classList.add('correct');
+      b.disabled=true;
+    });
+    const fb=$('qFb');fb.className='quiz-fb ok';fb.innerHTML='✅ ¡Correcto! '+q.exp;
+    $('qOwl').textContent='🦉✨';$('qBub').textContent='¡Muy bien!';
+    const nb=$('btnNext');nb.classList.add('show');
+    setTimeout(()=>nb.scrollIntoView({behavior:'smooth',block:'nearest'}),200);
+  } else {
+    S.attempts++;
+    document.querySelectorAll('.q-opt').forEach(b=>{
+      if(Number(b.dataset.v)===val)b.classList.add('wrong');
+    });
+    const fb=$('qFb'),inl=$('qInline');
+    if(S.attempts>=4){
+      S.answered=true;
+      document.querySelectorAll('.q-opt').forEach(b=>{
+        if(Number(b.dataset.v)===q.ans)b.classList.add('correct');
+        b.disabled=true;
+      });
+      fb.className='quiz-fb ok';
+      fb.innerHTML='💡 La respuesta es <strong>'+q.ans+'</strong>. '+q.exp;
+      $('qOwl').textContent='🦉📚';$('qBub').textContent='¡Aprendamos!';
+      const nb=$('btnNext');nb.classList.add('show');
+      setTimeout(()=>nb.scrollIntoView({behavior:'smooth',block:'nearest'}),200);
+    } else if(S.attempts===3){
+      const m=META[S.table];
+      fb.className='quiz-fb hint';fb.innerHTML='🔍 Revisá el truco del '+m.n+':';
+      inl.className='quiz-inline show';
+      inl.innerHTML=`<div class="qi-title">✨ Truco del ${m.n}</div><div class="qi-hl">${m.tip}</div><div class="qi-body">${m.tipD}</div><button class="btn-study-lnk" id="gotoStudy">📖 Ir a estudiar la tabla del ${m.n}</button>`;
+      $('qAtt').textContent='Intento '+S.attempts+' de 4';
+      $('qOwl').textContent='🦉📚';$('qBub').textContent='¡Revisá el truco!';
+      setTimeout(()=>{
+        const gs=$('gotoStudy');
+        if(gs)gs.addEventListener('click',()=>{S.fromQuiz=true;openStudy(S.table,true);});
+      },0);
+      setTimeout(()=>inl.scrollIntoView({behavior:'smooth',block:'nearest'}),200);
+    } else {
+      const left=4-S.attempts;
+      fb.className='quiz-fb err';fb.innerHTML=`❌ No es correcto. Te quedan ${left} intento${left!==1?'s':''}.`;
+      $('qAtt').textContent='Intento '+S.attempts+' de 4';
+      $('qOwl').textContent='🦉💙';$('qBub').textContent='¡No te rindás!';
+    }
+  }
+}
+
+function nextQ(){
+  if(S.quizIdx>=S.quizQs.length-1){showResults();return;}
+  S.quizIdx++;S.attempts=0;S.answered=false;
+  renderQ();
+  $('quiz-body').scrollTo({top:0,behavior:'instant'});
+}
+
+/* ══════════════════════════════════════════════════
+   RESULTS
+══════════════════════════════════════════════════ */
+function showResults(){
+  const total=S.quizQs.length;
+  const correct=Object.values(S.firstAns).filter(Boolean).length;
+  const nota=Math.round(correct/total*100);
+  const st=nota>=90?3:nota>=70?2:nota>=50?1:0;
+
+  S.stars[S.table]=Math.max(S.stars[S.table]||0,st);
+  saveStars();
+
+  const n=S.table,m=META[n];
+  let owlE,owlM;
+  if(nota>=90){owlE='🦉🎉';owlM='¡Increíble! ¡'+st+'  estrellas! ¡Sos una superestrella!';}
+  else if(nota>=70){owlE='🦉✨';owlM='¡Muy bien! ¡Aprobaste! Un poco más y llegas al 100.';}
+  else if(nota>=50){owlE='🦉💪';owlM='¡Buen intento! Repasá el estudio y volvé a intentarlo.';}
+  else{owlE='🦉❤️';owlM='¡No te preocupés! Todos aprendemos. Estudiá la tabla y volvé.';}
+
+  const wrongs=Object.entries(S.firstAns).filter(([,v])=>!v).map(([i])=>S.quizQs[Number(i)]);
+
+  const r=62,circ=2*Math.PI*r;
+  const offset=circ*(1-nota/100);
+
+  $('res-hdr').textContent='¡Terminaste!';
+  $('res-scroll').innerHTML=`
+    <div class="res-tname">Tabla del ${m.n} ${m.emoji}</div>
+    <div class="gauge-wrap">
+      <svg class="gauge-svg" viewBox="0 0 150 150">
+        <circle class="g-bg" cx="75" cy="75" r="${r}" stroke-dasharray="${circ}"/>
+        <circle class="g-arc" id="gArc" cx="75" cy="75" r="${r}" stroke-dasharray="${circ}" stroke-dashoffset="${circ}"/>
+      </svg>
+      <div class="gauge-text"><span class="g-num" id="gNum">0</span><span class="g-lbl">NOTA</span></div>
+    </div>
+    <div class="res-stars">${stars(st)}</div>
+    <div class="res-owl-row"><span class="res-owl">${owlE}</span><span class="res-owl-txt">${owlM}</span></div>
+    <div class="res-box">
+      <div class="res-box-title">Resumen</div>
+      <div class="res-stat"><span>Correctas (1er intento)</span><span class="res-sv">${correct} / ${total}</span></div>
+      <div class="res-stat"><span>Nota</span><span class="res-sv">${nota}</span></div>
+      <div class="res-stat"><span>Estrellas ganadas</span><span class="res-sv">${'⭐'.repeat(st)||'—'}</span></div>
+    </div>
+    ${wrongs.length?`<div class="wrong-list"><div class="wrong-ttl">Para repasar (${wrongs.length})</div>${wrongs.map(wq=>`<div class="wrong-item"><div class="wrong-q">${wq.q}</div><div class="wrong-a">✅ Respuesta: ${wq.ans}</div><div class="wrong-e">${wq.exp}</div></div>`).join('')}</div>`:''}
+    <div class="res-btns">
+      <button class="btn-pri" id="btnRetry">🔄 Reintentar quiz</button>
+      <button class="btn-sec" id="btnResStudy">📖 Estudiar la tabla</button>
+      <button class="btn-sec" id="btnResHome">🏠 Inicio</button>
+    </div>
+  `;
+
+  showView('results');
+
+  setTimeout(()=>{
+    const arc=$('gArc');if(arc)arc.style.strokeDashoffset=offset;
+    let cur=0,step=Math.max(1,Math.ceil(nota/40));
+    const t=setInterval(()=>{cur=Math.min(cur+step,nota);const el=$('gNum');if(el)el.textContent=cur;if(cur>=nota)clearInterval(t);},30);
+  },120);
+
+  setTimeout(()=>{
+    $('btnRetry')?.addEventListener('click',()=>startQuiz(n));
+    $('btnResStudy')?.addEventListener('click',()=>openStudy(n,false));
+    $('btnResHome')?.addEventListener('click',renderHome);
+  },0);
+}
+
+/* ══════════════════════════════════════════════════
+   EVENTS
+══════════════════════════════════════════════════ */
+function initEvents(){
+  // Study buttons
+  $('study-back').addEventListener('click',()=>{
+    if(S.fromQuiz){S.fromQuiz=false;showView('quiz');} else renderHome();
+  });
+  $('study-exit').addEventListener('click',renderHome);
+
+  $('sUp').addEventListener('click',()=>{if(S.studyIdx>0)scrollStudyTo(S.studyIdx-1);});
+  $('sDown').addEventListener('click',()=>{if(S.studyIdx<STUDY_CARDS-1)scrollStudyTo(S.studyIdx+1);});
+
+  // Study scroll delegation for start-quiz button
+  $('study-scroller').addEventListener('click',e=>{
+    if(e.target.id==='btn-start-quiz')startQuiz(S.table);
+  });
+
+  // Quiz back → return to study
+  $('quiz-back').addEventListener('click',()=>openStudy(S.table,false));
+
+  // Study scroll spy
+  let raf=null;
+  $('study-scroller').addEventListener('scroll',()=>{
+    if(raf)cancelAnimationFrame(raf);
+    raf=requestAnimationFrame(()=>{
+      const idx=getStudyIdx();
+      if(idx!==S.studyIdx){
+        S.studyIdx=idx;
+        updateStudyDots(idx);
+        updateStudyArrows();
+        if(idx===1)setTimeout(()=>animateDots(S.table),300);
+      }
+    });
+  },{passive:true});
+
+  // Keyboard
+  document.addEventListener('keydown',e=>{
+    if(S.view==='study'){
+      if(e.key==='ArrowDown'||e.key==='PageDown'){e.preventDefault();if(S.studyIdx<STUDY_CARDS-1)scrollStudyTo(S.studyIdx+1);}
+      if(e.key==='ArrowUp'||e.key==='PageUp'){e.preventDefault();if(S.studyIdx>0)scrollStudyTo(S.studyIdx-1);}
+    }
+    if(S.view==='quiz'&&e.key==='Enter'&&S.answered)nextQ();
+  });
+}
+
+/* ══════════════════════════════════════════════════
+   INIT
+══════════════════════════════════════════════════ */
+function init(){
+  S.stars=loadStars();
+  renderHome();
+  initEvents();
+}
+document.addEventListener('DOMContentLoaded',init);
+</script>
+</body>
+</html>
