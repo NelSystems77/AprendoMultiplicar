@@ -82,9 +82,11 @@
     .dot-row{display:flex;gap:5px}
     .dot{width:16px;height:16px;border-radius:50%;background:var(--tc);opacity:0;transition:opacity .2s}
     .dot.v{opacity:1}
-    .facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:6px}
-    .f-row{background:var(--bg);border-radius:10px;padding:7px 12px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.86rem;font-weight:600;color:var(--text);display:flex;justify-content:space-between}
+    .facts-grid{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:6px}
+    .f-row{background:var(--bg);border-radius:9px;padding:5px 10px;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;font-size:.82rem;font-weight:600;color:var(--text);display:flex;justify-content:space-between}
     .f-ans{color:var(--tc);font-weight:800}
+    .facts-sc{overflow-y:auto;overscroll-behavior:contain;max-height:calc(100dvh - 200px)}
+    .facts-sc::-webkit-scrollbar{display:none}
     .sc-cover{background:var(--tc-s);border-radius:22px;padding:26px 22px;text-align:center;width:100%;max-width:360px}
     .sc-c-emoji{font-size:3.2rem;line-height:1;margin-bottom:10px}
     .sc-c-title{font-size:clamp(1.4rem,5vw,1.9rem);font-weight:800;letter-spacing:-.02em;color:var(--tc);margin-bottom:6px}
@@ -256,11 +258,11 @@
 const META = {
   2: {n:'2',label:'del 2', emoji:'🐧',color:'#4F8EF7',soft:'#EBF2FF',tip:'Duplicá el número',tipD:'El doble de N es N+N. Ej: 2×7=7+7=14'},
   3: {n:'3',label:'del 3', emoji:'🐸',color:'#2DB87A',soft:'#E4F8EF',tip:'Contá de 3 en 3',tipD:'3→6→9→12→15→18→21→24→27→30'},
-  4: {n:'4',label:'del 4', emoji:'🦋',color:'#E8961E',soft:'#FFF3E0',tip:'Doble del doble',tipD:'4×N = ×2 luego ×2 otra vez. Ej: 4×7=14×2=28'},
+  4: {n:'4',label:'del 4', emoji:'🦋',color:'#E8961E',soft:'#FFF3E0',tip:'Contá de 4 en 4',tipD:'4·8·12·16·20·24·28·32·36·40 — aprendé la secuencia y listo'},
   5: {n:'5',label:'del 5', emoji:'⭐',color:'#D060A0',soft:'#FCE8F4',tip:'Termina en 0 ó 5',tipD:'5·10·15·20·25·30·35·40·45·50 — siempre 0 ó 5'},
   6: {n:'6',label:'del 6', emoji:'🐠',color:'#7050E0',soft:'#EDE8FC',tip:'6×7=42, 6×8=48',tipD:'Los más difíciles: 6×7=42 y 6×8=48. ¡Aprendelos de memoria!'},
   7: {n:'7',label:'del 7', emoji:'🦊',color:'#E06030',soft:'#FDEEE8',tip:'5,6,7,8 → 56=7×8',tipD:'Cuatro números seguidos: 5,6,7,8 → 56=7×8. ¡El truco más famoso!'},
-  8: {n:'8',label:'del 8', emoji:'🐙',color:'#1A9A90',soft:'#E0F6F4',tip:'Duplicá 3 veces',tipD:'8×N = ×2 ×2 ×2. Ej: 8×3=6=12=24'},
+  8: {n:'8',label:'del 8', emoji:'🐙',color:'#1A9A90',soft:'#E0F6F4',tip:'Contá de 8 en 8',tipD:'8·16·24·32·40·48·56·64·72·80 — y recordá: 5,6,7,8 → 56=7×8=8×7'},
   9: {n:'9',label:'del 9', emoji:'🌙',color:'#B03070',soft:'#FCE4EE',tip:'Los dígitos suman 9',tipD:'9×2=18(1+8=9), 9×3=27(2+7=9)... ¡siempre!'},
  10: {n:'10',label:'del 10',emoji:'🚀',color:'#2F9E55',soft:'#E4F5EB',tip:'Agregá un cero',tipD:'10×7=70, 10×9=90. Solo agrega un 0 al final.'},
 };
@@ -328,16 +330,16 @@ const QD = {
 ],
 4:[
   {q:'4 × 1', ans:4,  opts:[2,3,4,5],    exp:'4×1 = 4. ¡Cualquier número × 1 es él mismo! ✓'},
-  {q:'4 × 2', ans:8,  opts:[4,8,12,16],  exp:'4×2 = 8. Doble del doble: 2×2=4, 4×2=8 ✓'},
-  {q:'4 × 3', ans:12, opts:[8,12,16,20], exp:'4×3 = 12. Doble del doble: 3×2=6, 6×2=12 ✓'},
-  {q:'4 × 4', ans:16, opts:[12,16,20,24],exp:'4×4 = 16. Doble del doble: 4×2=8, 8×2=16 ✓'},
-  {q:'4 × 5', ans:20, opts:[16,20,24,28],exp:'4×5 = 20. Doble del doble: 5×2=10, 10×2=20 ✓'},
-  {q:'4 × 6', ans:24, opts:[20,24,28,32],exp:'4×6 = 24. Doble del doble: 6×2=12, 12×2=24 ✓'},
-  {q:'4 × 7', ans:28, opts:[24,28,32,36],exp:'4×7 = 28. Doble del doble: 7×2=14, 14×2=28 ✓'},
-  {q:'4 × 8', ans:32, opts:[28,32,36,40],exp:'4×8 = 32. Doble del doble: 8×2=16, 16×2=32 ✓'},
-  {q:'4 × 9', ans:36, opts:[32,36,40,44],exp:'4×9 = 36. Doble del doble: 9×2=18, 18×2=36 ✓'},
+  {q:'4 × 2', ans:8,  opts:[4,8,12,16],  exp:'4×2 = 8. Contando de 4 en 4: 4, 8 ✓'},
+  {q:'4 × 3', ans:12, opts:[8,12,16,20], exp:'4×3 = 12. Contando de 4 en 4: 4, 8, 12 ✓'},
+  {q:'4 × 4', ans:16, opts:[12,16,20,24],exp:'4×4 = 16. Contando de 4 en 4: 4, 8, 12, 16 ✓'},
+  {q:'4 × 5', ans:20, opts:[16,20,24,28],exp:'4×5 = 20. Contando de 4 en 4: 4, 8, 12, 16, 20 ✓'},
+  {q:'4 × 6', ans:24, opts:[20,24,28,32],exp:'4×6 = 24. Contando de 4 en 4: 4, 8, 12, 16, 20, 24 ✓'},
+  {q:'4 × 7', ans:28, opts:[24,28,32,36],exp:'4×7 = 28. Contando de 4 en 4: ..., 20, 24, 28 ✓'},
+  {q:'4 × 8', ans:32, opts:[28,32,36,40],exp:'4×8 = 32. Contando de 4 en 4: ..., 24, 28, 32 ✓'},
+  {q:'4 × 9', ans:36, opts:[32,36,40,44],exp:'4×9 = 36. Contando de 4 en 4: ..., 28, 32, 36 ✓'},
   {q:'4 × 10',ans:40, opts:[36,40,44,48],exp:'4×10 = 40. Agrega un cero al 4 → 40 ✓'},
-  {q:'4 × ? = 32',ans:8,opts:[6,7,8,9],  exp:'4×8 = 32. Doble del doble: 8×2=16, 16×2=32 ✓'},
+  {q:'4 × ? = 32',ans:8,opts:[6,7,8,9],  exp:'4×8 = 32. Contando de 4 en 4, el 8vo número es 32 ✓'},
   {q:'Una silla tiene 4 patas. ¿Cuántas patas tienen 9 sillas?',ans:36,opts:[32,36,40,44],exp:'9 sillas × 4 patas = 36 patas. 4×9 = 36 ✓'},
 ],
 9:[
@@ -358,7 +360,7 @@ const QD = {
   {q:'6 × 1', ans:6,  opts:[4,5,6,7],    exp:'6×1 = 6. ¡Cualquier número × 1 es él mismo! ✓'},
   {q:'6 × 2', ans:12, opts:[6,12,18,24],  exp:'6×2 = 12. El doble de 6 = 12 ✓'},
   {q:'6 × 3', ans:18, opts:[12,18,24,30], exp:'6×3 = 18. Contás: 6, 12, 18 ✓'},
-  {q:'6 × 4', ans:24, opts:[18,24,30,36], exp:'6×4 = 24. Doble del doble: 6×2=12, 12×2=24 ✓'},
+  {q:'6 × 4', ans:24, opts:[18,24,30,36], exp:'6×4 = 24. Contando: 6, 12, 18, 24 — el 4to número ✓'},
   {q:'6 × 5', ans:30, opts:[24,30,36,42], exp:'6×5 = 30. Mitad de 6 (=3) + cero → 30 ✓'},
   {q:'6 × 6', ans:36, opts:[30,36,42,48], exp:'6×6 = 36. El cuadrado del 6 es 36 ✓'},
   {q:'6 × 7', ans:42, opts:[36,42,48,54], exp:'6×7 = 42. ¡Aprendelo de memoria! 6×7 = 42 ✓'},
@@ -385,8 +387,8 @@ const QD = {
 8:[
   {q:'8 × 1', ans:8,  opts:[6,7,8,9],    exp:'8×1 = 8. ¡Cualquier número × 1 es él mismo! ✓'},
   {q:'8 × 2', ans:16, opts:[8,16,24,32],  exp:'8×2 = 16. El doble de 8 = 16 ✓'},
-  {q:'8 × 3', ans:24, opts:[16,24,32,40], exp:'8×3 = 24. Duplicá 3 veces: 3→6→12→24 ✓'},
-  {q:'8 × 4', ans:32, opts:[24,32,40,48], exp:'8×4 = 32. Duplicá 3 veces: 4→8→16→32 ✓'},
+  {q:'8 × 3', ans:24, opts:[16,24,32,40], exp:'8×3 = 24. Contando de 8 en 8: 8, 16, 24 ✓'},
+  {q:'8 × 4', ans:32, opts:[24,32,40,48], exp:'8×4 = 32. Contando de 8 en 8: 8, 16, 24, 32 ✓'},
   {q:'8 × 5', ans:40, opts:[32,40,48,56], exp:'8×5 = 40. Mitad de 8 (=4) + cero → 40 ✓'},
   {q:'8 × 6', ans:48, opts:[40,48,56,64], exp:'8×6 = 48. ¡Igual que 6×8=48! (conmutativa) ✓'},
   {q:'8 × 7', ans:56, opts:[48,56,64,72], exp:'8×7 = 56. ¡Truco: 5,6,7,8 → 56=7×8=8×7! ✓'},
@@ -471,11 +473,11 @@ function renderHome(){
 const TRICKS = {
   2:`<div class="sc-title">¡Solo duplicá el número!</div><div class="sc-hl">2 × N = N + N</div><div class="sc-body">2×6 = 6+6 = <strong>12</strong><br>2×9 = 9+9 = <strong>18</strong><br>2×7 = 7+7 = <strong>14</strong></div>`,
   3:`<div class="sc-title">¡Contá de 3 en 3!</div><div class="sc-hl">3→6→9→12→15→18→21→24→27→30</div><div class="sc-body">3×4 = el 4to número = <strong>12</strong><br>3×7 = el 7mo número = <strong>21</strong><br>¡Practicá en voz alta!</div>`,
-  4:`<div class="sc-title">¡El doble del doble!</div><div class="sc-hl">4 × N = (N×2) × 2</div><div class="sc-body">4×7 → 7×2=14 → 14×2=<strong>28</strong><br>4×8 → 8×2=16 → 16×2=<strong>32</strong><br>4×9 → 9×2=18 → 18×2=<strong>36</strong></div>`,
+  4:`<div class="sc-title">¡Contá de 4 en 4!</div><div class="sc-hl">4 · 8 · 12 · 16 · 20 · 24 · 28 · 32 · 36 · 40</div><div class="sc-body">¡Practicá en voz alta hasta que fluya solo!<br><br>4×3 = el 3er número = <strong>12</strong><br>4×7 = el 7mo número = <strong>28</strong><br>4×9 = el 9no número = <strong>36</strong><br><br>💡 Todos los resultados son siempre <strong>pares</strong>.</div>`,
   5:`<div class="sc-title">¡Siempre termina en 0 ó 5!</div><div class="sc-hl">5·10·15·20·25·30·35·40·45·50</div><div class="sc-body">Factor par: mitad + cero. 5×8 → 8÷2=4 → <strong>40</strong><br>Factor impar: termina en 5. 5×7 = <strong>35</strong></div>`,
   6:`<div class="sc-title">Los dos más importantes del 6:</div><div class="sc-hl">6 × 7 = 42 &nbsp;·&nbsp; 6 × 8 = 48</div><div class="sc-body">¡Aprendelos de memoria!<br>El resto: 6×2=12, 6×3=18, 6×4=24, 6×5=30, 6×6=36, 6×9=54, 6×10=60</div>`,
   7:`<div class="sc-title">¡El truco de los 4 números seguidos!</div><div class="sc-hl">5 · 6 · 7 · 8 → 56 = 7 × 8</div><div class="sc-body">El hecho más difícil tiene su propio truco:<br>cuatro números seguidos te dicen que <strong>7×8=56</strong>.<br>El resto del 7: 7→14→21→28→35→42→49→56→63→70</div>`,
-  8:`<div class="sc-title">¡Duplicá 3 veces!</div><div class="sc-hl">8 × N = N×2 → ×2 → ×2</div><div class="sc-body">8×3 → 3×2=6 → 6×2=12 → 12×2=<strong>24</strong><br>8×7 → 7×2=14 → 14×2=28 → 28×2=<strong>56</strong><br>¡Recordá también: 5,6,7,8 → 56=8×7!</div>`,
+  8:`<div class="sc-title">¡Contá de 8 en 8!</div><div class="sc-hl">8 · 16 · 24 · 32 · 40 · 48 · 56 · 64 · 72 · 80</div><div class="sc-body">¡Practicá en voz alta!<br><br>8×3 = el 3er número = <strong>24</strong><br>8×6 = el 6to número = <strong>48</strong><br>8×9 = el 9no número = <strong>72</strong><br><br>🌟 Truco especial: 5,6,7,8 → <strong>56 = 7×8 = 8×7</strong></div>`,
   9:`<div class="sc-title">¡Los dígitos siempre suman 9!</div><div class="sc-hl">9×2=18(1+8=9)&nbsp;·&nbsp;9×5=45(4+5=9)</div><div class="sc-body">Truco extra: el primer dígito = factor − 1<br>9×3 → 3−1=<strong>2</strong> → segundo dígito = 9−2=<strong>7</strong> → <strong>27</strong><br>9×7 → 7−1=<strong>6</strong> → 9−6=<strong>3</strong> → <strong>63</strong></div>`,
   10:`<div class="sc-title">¡La más fácil! Solo agregá un 0.</div><div class="sc-hl">10 × N = N seguido de un cero</div><div class="sc-body">10×3 = <strong>30</strong> &nbsp; 10×7 = <strong>70</strong><br>10×9 = <strong>90</strong> &nbsp; 10×10 = <strong>100</strong></div>`,
 };
@@ -505,7 +507,7 @@ function buildStudyCards(n){
 
   // Card 0: Cover
   const c0=document.createElement('div');c0.className='s-card';
-  c0.innerHTML=`<div class="sc-cover"><div class="sc-c-emoji">${m.emoji}</div><div class="sc-c-title">¡Tabla del ${m.n}!</div><div class="sc-c-tip">Truco clave: <strong>${m.tip}</strong></div></div><div class="sc-box" style="max-width:360px;width:100%"><div class="sc-lbl">¿Qué aprenderás?</div><div class="sc-body">Los 10 hechos de la tabla del ${m.n}, de ${m.n}×1 hasta ${m.n}×10, con trucos para recordarlos fácilmente. 🧠</div></div>`;
+  c0.innerHTML=`<div class="sc-cover"><div class="sc-c-emoji">${m.emoji}</div><div class="sc-c-title">¡Tabla del ${m.n}!</div><div class="sc-c-tip">Truco clave: <strong>${m.tip}</strong></div></div><div class="sc-box" style="max-width:360px;width:100%"><div class="sc-lbl">¿Qué vas a aprender?</div><div class="sc-body">La tabla completa del <strong>${m.n}</strong>: desde <strong>${m.n}×1=${m.n*1}</strong> hasta <strong>${m.n}×10=${m.n*10}</strong>, con un truco especial para recordarla fácilmente. 🧠</div></div>`;
   cards.push(c0);
 
   // Card 1: Concepto (dot array)
@@ -523,7 +525,7 @@ function buildStudyCards(n){
   let facts='<div class="facts-grid">';
   for(let i=1;i<=10;i++)facts+=`<div class="f-row"><span>${n}×${i} =</span><span class="f-ans">${n*i}</span></div>`;
   facts+='</div>';
-  c3.innerHTML=`<div class="sc-box" style="max-width:360px;width:100%"><div class="sc-lbl">📋 Tabla completa del ${m.n}</div>${facts}</div>`;
+  c3.innerHTML=`<div class="sc-box facts-sc" style="max-width:360px;width:100%"><div class="sc-lbl">📋 Tabla completa del ${m.n} (×1 al ×10)</div>${facts}</div>`;
   cards.push(c3);
 
   // Card 4: Launch
